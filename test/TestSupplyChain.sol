@@ -9,9 +9,9 @@ import "./SupplyChainAccount.sol";
 
 // NOTES
 // sol tests allow contract to contract testing, vs just web3 to contract in js tests
-// Low-level call function returns false if an error occurred and true otherwise.
-// need proxy if we want to switch addresses
-// sub calls won't automatically bubble up?
+// Regular function invocations will bubble up to the caller and end the tx, but low-level call function returns false/true, so we can test for certain conditions/throws without breaking the test!
+// Proxy contract can wrap each call so .call(abi.encodeWithSignature(signatureString, arg); doesn't need to we written out each time. We just call .execute();
+// Also need proxies if we want to switch addresses.
 
 contract SupplyChainTest { // the syntax for tests is nameTest
     // Test for failing conditions in this contracts:
@@ -51,27 +51,29 @@ contract SupplyChainTest { // the syntax for tests is nameTest
 
         SupplyChain(address(seller)).addItem("laptop", 5 wei); // add an item
         (bool result, ) = SupplyChainAccount(address(seller)).execute.gas(200000)();
+        // we cap the gas because otherwise the call would eat all the gas.
+        // we want enough gas so we avoid OOG and trigger the actual condition
         Assert.isTrue(result, "should be able to purchase");
 
-        // uint oneSku = supplyChainInstance.skuCount();
-        // Assert.equal(oneSku, 1, "should be 1 item");
+        uint oneSku = supplyChainInstance.skuCount();
+        Assert.equal(oneSku, 1, "should be 1 item");
 
-        // address ownerAddr = supplyChainInstance.owner();
-        // Assert.equal(ownerAddr, address(owner), "owner should match address");
+        address ownerAddr = supplyChainInstance.owner();
+        Assert.equal(ownerAddr, address(owner), "owner should match address");
 
-        // (string memory name, uint sku, uint price, SupplyChain.State state, address sellerAddr, address buyerAddr) = supplyChainInstance.items(0);
+        (string memory name, uint sku, uint price, SupplyChain.State state, address sellerAddr, address buyerAddr) = supplyChainInstance.items(0);
 
-        // Assert.equal(name, 'laptop', "should be laptop");
-        // Assert.equal(sku, 0, "should be sku 0");
-        // Assert.equal(price, 5 wei, "should be 5 wei");
-        // /* If state is not casted to uint, then this error is thrown:
-        // TypeError: Member "equal" not found or not visible after argument-dependent lookup in type(library Assert).
-        // Assert.equal(state, SupplyChain.State.ForSale, "should be State.ForSale");
-        // ^----------^
-        // */
-        // Assert.equal(uint(state), 0, "should be State.ForSale");
-        // Assert.equal(sellerAddr, address(seller), "should be address(this)");
-        // Assert.equal(buyerAddr, address(0), "should be address(0)");
+        Assert.equal(name, 'laptop', "should be laptop");
+        Assert.equal(sku, 0, "should be sku 0");
+        Assert.equal(price, 5 wei, "should be 5 wei");
+        /* If state is not casted to uint, then this error is thrown:
+        TypeError: Member "equal" not found or not visible after argument-dependent lookup in type(library Assert).
+        Assert.equal(state, SupplyChain.State.ForSale, "should be State.ForSale");
+        ^----------^
+        */
+        Assert.equal(uint(state), 0, "should be State.ForSale");
+        Assert.equal(sellerAddr, address(seller), "should be address(this)");
+        Assert.equal(buyerAddr, address(0), "should be address(0)");
     }
 
     /*
@@ -79,19 +81,20 @@ contract SupplyChainTest { // the syntax for tests is nameTest
     */
 
     // test purchase of item
-    // function testBuyItem() public { // the syntax for test is testName
+    function testBuyItem() public { // the syntax for test is testName
 
-    //     SupplyChain(address(seller)).addItem("CITC", 5 wei); // add an item
-    //     SupplyChain(address(buyer)).buyItem.value(10 wei)(0);
+        SupplyChain(address(seller)).addItem("CITC", 5 wei); // add an item
+        SupplyChain(address(buyer)).buyItem.value(10 wei)(0);
+        Assert.equal(address(buyer).balance, 10 wei, "this is the current wei balance"); // test to see if this address has the truffle initialBalance
 
-    //     (bool result, ) = SupplyChainAccount(address(buyer)).execute.gas(200000)();
-    //     Assert.isTrue(result, "should have executed");
+        (bool result, ) = SupplyChainAccount(address(buyer)).execute.gas(300000)();
+        Assert.isTrue(result, "should have executed");
 
-    //     (,,,SupplyChain.State state,,address buyerAddr) = supplyChainInstance.items(0);
-    //     Assert.equal(uint(state), 1, "should be State.Sold");
-    //     Assert.equal(buyerAddr, address(buyer), "should be bought by seller");
-    //     Assert.equal(buyerAddr.balance, 5 wei, "should be refunded excess");
-    // }
+        (,,,SupplyChain.State state,,address buyerAddr) = supplyChainInstance.items(0);
+        Assert.equal(uint(state), 1, "should be State.Sold");
+        Assert.equal(buyerAddr, address(buyer), "should be bought by seller");
+        Assert.equal(buyerAddr.balance, 5 wei, "should be refunded excess");
+    }
 
     // // test for failure if buyer does not send enough funds
     // function testBuyFailsIfNotEnoughEth() public {

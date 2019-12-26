@@ -11,7 +11,7 @@ contract AccountProxy {
   constructor() public {}
 
   //prime the data using the fallback function.
-  function() external {
+  function() external payable {
     data = msg.data;
   }
 
