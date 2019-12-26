@@ -99,11 +99,10 @@ contract SupplyChain {
     owner = msg.sender;
   }
 
-  function addItem(string memory _name, uint _price) public returns(bool){
+  function addItem(string memory _name, uint _price) public {
     emit LogForSale(skuCount);
     items[skuCount] = Item({name: _name, sku: skuCount, price: _price, state: State.ForSale, seller: msg.sender, buyer: address(0)});
     skuCount = skuCount + 1;
-    return true;
   }
 
   /* Add a keyword so the function can be paid. This function should transfer money

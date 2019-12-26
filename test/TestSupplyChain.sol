@@ -51,8 +51,8 @@ contract SupplyChainTest { // the syntax for tests is nameTest
 
         SupplyChain(address(seller)).addItem("laptop", 5 wei); // add an item
         (bool result, ) = SupplyChainAccount(address(seller)).execute.gas(200000)();
-        // we cap the gas because otherwise the call would eat all the gas.
-        // we want enough gas so we avoid OOG and trigger the actual condition
+    //     // we cap the gas because otherwise the call would eat all the gas.
+    //     // we want enough gas so we avoid OOG and trigger the actual condition
         Assert.isTrue(result, "should be able to purchase");
 
         uint oneSku = supplyChainInstance.skuCount();
@@ -96,7 +96,7 @@ contract SupplyChainTest { // the syntax for tests is nameTest
         Assert.equal(buyerAddr.balance, 5 wei, "should be refunded excess");
     }
 
-    // // test for failure if buyer does not send enough funds
+    // test for failure if buyer does not send enough funds
     // function testBuyFailsIfNotEnoughEth() public {
     //     SupplyChain(address(seller)).addItem("CITC", 5 wei); // add an item
 
@@ -106,7 +106,7 @@ contract SupplyChainTest { // the syntax for tests is nameTest
     //     Assert.isFalse(result, "should be false since only 4 wei sent and 5 wei required");
     // }
 
-    // // test for purchasing an item that is not for Sale
+    // test for purchasing an item that is not for Sale
     // function testBuyFailIfItemNotForSale() public {
     //     uint skuCount = supplyChainInstance.skuCount();
     //     (,,uint price,,,) = supplyChainInstance.items(0);
