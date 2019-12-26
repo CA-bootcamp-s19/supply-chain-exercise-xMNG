@@ -4,7 +4,7 @@ pragma solidity ^0.5.0;
  * @title AccountProxy
  * @dev Proxy contract for account differentiation in Solidity testing, 
  * Modified from OpenZeppelin SDK upgradable proxy contract.
- * Also from @Fengkie Junis/ @Francis B. Odisi
+ * Also from Fengkie Junis/ Francis B. Odisi
  */
 contract AccountProxy {
   address internal callee;
