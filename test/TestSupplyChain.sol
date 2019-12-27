@@ -10,7 +10,7 @@ import "./SupplyChainAccount.sol";
 // sol tests allow contract to contract testing, vs just web3 to contract
 // raw calls return bool but subcalls won't automatically bubble up
 
-contract SupplyChainTest { // the syntax for tests is nameTest
+contract TestSupplyChain { // the syntax for tests is nameTest
     // Test for failing conditions in this contracts:
     // https://truffleframework.com/tutorials/testing-for-throws-in-solidity-tests
 
